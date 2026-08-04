@@ -92,6 +92,10 @@ cycle_lighting={
 "deadzone": 0.5,
 "events": [Object(InputEventKey,"physical_keycode":76)]
 }
+toggle_mesh_lines={
+"deadzone": 0.5,
+"events": [Object(InputEventKey,"physical_keycode":77)]
+}
 fly_forward={
 "deadzone": 0.2,
 "events": [Object(InputEventKey,"physical_keycode":87)]
