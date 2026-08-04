@@ -9,6 +9,7 @@ for higher-end Eevee or Cycles renders.
 - dark cyclorama room, layered turntable, emissive practicals, contact-friendly
   asset placement, and cyan/magenta key-rim lighting;
 - one-key neutral-white material inspection mode;
+- toggleable textured-smooth and textured mesh-line presentation modes;
 - automatic GLB/GLTF/OBJ/scene centering, grounding, and height/diameter fit;
 - seven repeatable hero, inspection, detail, rear, top, and wide shots;
 - orbit camera, manual free-fly camera, and a separate automated cinematic
@@ -59,10 +60,17 @@ GLB mesh hierarchies are the supported baseline.
 | `C` or `F` | Toggle hero and free-fly cameras |
 | `R` | Reset camera and turntable angle |
 | `L` | Toggle cyan/magenta glam and neutral inspection light |
+| `M` | Toggle textured smooth and textured mesh-line presentation |
 | `P` | Save a clean PNG; the overlay hides for the captured frame |
 | `H` | Hide/show the overlay |
 | RMB + mouse | Look around in free-fly mode |
 | `WASD`, `Q/E`, `Shift` | Fly, descend/ascend, boost |
+
+Mesh-line mode preserves the asset's original textured materials and applies a
+subtle translucent cyan wire overlay. Existing per-mesh material overlays are
+restored when returning to smooth mode. Tune `Mesh Line Color` on
+`Stage/Turntable/AssetSlot`, or enable `Start With Mesh Lines` for a scene-owned
+default.
 
 PNG captures are stored under `user://showcase_captures/`. Godot prints the
 absolute file path in the Output panel after every capture.
