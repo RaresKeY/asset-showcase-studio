@@ -24,6 +24,7 @@ extends Node3D
 @onready var status_label: Label = $Interface/Margin/Panel/VBox/Status
 @onready var camera_label: Label = $Interface/Margin/Panel/VBox/Camera
 @onready var lighting_label: Label = $Interface/Margin/Panel/VBox/Lighting
+@onready var surface_label: Label = $Interface/Margin/Panel/VBox/Surface
 @onready var asset_slot: ShowcaseAssetSlot = $Stage/Turntable/AssetSlot
 
 var _fly_mode := false
@@ -38,7 +39,9 @@ func _ready() -> void:
 	turntable.playback_changed.connect(_on_turntable_changed)
 	turntable.speed_changed.connect(_on_speed_changed)
 	asset_slot.asset_fitted.connect(_on_asset_fitted)
+	asset_slot.presentation_mode_changed.connect(_on_presentation_mode_changed)
 	_update_status()
+	_update_surface_status(asset_slot.mesh_lines_enabled())
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_ui"):
@@ -78,6 +81,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		_capture_frame()
 	elif event.is_action_pressed("cycle_lighting"):
 		_apply_lighting_preset((_lighting_preset + 1) % 2)
+	elif event.is_action_pressed("toggle_mesh_lines"):
+		asset_slot.toggle_mesh_lines()
 
 func set_fly_camera(value: bool) -> void:
 	_fly_mode = value
@@ -92,12 +97,19 @@ func _on_turntable_changed(_paused: bool) -> void:
 func _on_speed_changed(_speed: float) -> void:
 	_update_status()
 
+func _on_presentation_mode_changed(mesh_lines_enabled: bool) -> void:
+	_update_surface_status(mesh_lines_enabled)
+
 func _update_status() -> void:
 	if not is_instance_valid(status_label):
 		return
 	var state := "PAUSED" if turntable.paused else "ROLLING"
 	var direction := "CW" if turntable.clockwise else "CCW"
 	status_label.text = "TURNTABLE  %s  |  %.1f°/s  %s" % [state, turntable.speed_degrees, direction]
+
+func _update_surface_status(mesh_lines_enabled: bool) -> void:
+	if is_instance_valid(surface_label):
+		surface_label.text = "SURFACE  %s" % ("TEXTURED + MESH LINES" if mesh_lines_enabled else "TEXTURED SMOOTH")
 
 func _on_asset_fitted(bounds: AABB) -> void:
 	bounds = asset_slot.global_transform * bounds
