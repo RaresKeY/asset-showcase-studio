@@ -1,0 +1,13 @@
+.godot/
+.import/
+recordings/*
+!recordings/.gitkeep
+renders/
+*.avi
+*.mp4
+*.mov
+*.blend1
+*.blend2
+__pycache__/
+*.pyc
+

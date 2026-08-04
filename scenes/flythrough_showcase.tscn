@@ -1,0 +1,13 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="PackedScene" path="res://scenes/showcase_studio.tscn" id="1_showcase"]
+[ext_resource type="Script" path="res://scripts/cinematic_flythrough.gd" id="2_cinematic"]
+
+[node name="FlyThroughShowcase" type="Node3D"]
+script = ExtResource("2_cinematic")
+duration_seconds = 12.0
+loop_playback = true
+
+[node name="ShowcaseStudio" parent="." instance=ExtResource("1_showcase")]
+start_in_fly_camera = true
+start_with_ui_visible = false

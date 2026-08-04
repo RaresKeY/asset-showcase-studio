@@ -1,0 +1,16 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/fly_camera.gd" id="1_fly"]
+
+[node name="FlyCameraRig" type="Node3D"]
+position = Vector3(4.8, 2.7, 6.2)
+rotation = Vector3(-0.18, 0.64, 0)
+script = ExtResource("1_fly")
+enabled = false
+move_speed = 4.5
+
+[node name="Camera3D" type="Camera3D" parent="."]
+fov = 54.0
+near = 0.05
+far = 120.0
+

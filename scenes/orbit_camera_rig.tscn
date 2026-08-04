@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scripts/orbit_camera.gd" id="1_orbit"]
+
+[node name="OrbitCameraRig" type="Node3D"]
+script = ExtResource("1_orbit")
+distance = 7.2
+pitch_degrees = -12.0
+yaw_degrees = 24.0
+target_height = 1.35
+
+[node name="Pitch" type="Node3D" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="Pitch"]
+current = true
+fov = 38.0
+near = 0.05
+far = 100.0
+

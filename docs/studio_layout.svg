@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600">
+  <defs>
+    <radialGradient id="floor" cx="50%" cy="48%" r="70%">
+      <stop offset="0" stop-color="#20283a"/>
+      <stop offset="1" stop-color="#090c14"/>
+    </radialGradient>
+    <filter id="cyanGlow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="pinkGlow"><feGaussianBlur stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <marker id="cyanArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#37d8ff"/></marker>
+    <marker id="pinkArrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#ff3eb5"/></marker>
+  </defs>
+  <rect width="960" height="600" rx="24" fill="#070a11"/>
+  <rect x="36" y="34" width="888" height="532" rx="18" fill="url(#floor)" stroke="#303a50" stroke-width="2"/>
+  <path d="M110 115 Q480 55 850 115" fill="none" stroke="#626f88" stroke-width="18" opacity=".7"/>
+  <path d="M110 115 Q480 55 850 115" fill="none" stroke="#a5b0c4" stroke-width="2" opacity=".6"/>
+  <text x="480" y="75" fill="#aeb8cb" font-family="system-ui,sans-serif" font-size="16" text-anchor="middle">CYC WALL</text>
+
+  <circle cx="480" cy="315" r="128" fill="none" stroke="#7a8ba8" stroke-width="2" stroke-dasharray="7 9" opacity=".65"/>
+  <circle cx="480" cy="315" r="76" fill="#151c29" stroke="#aebcd4" stroke-width="8"/>
+  <circle cx="480" cy="315" r="65" fill="#242e40" stroke="#37d8ff" stroke-width="3" filter="url(#cyanGlow)"/>
+  <rect x="455" y="275" width="50" height="80" rx="10" fill="#657086" stroke="#e1e8f5" stroke-width="2"/>
+  <circle cx="480" cy="315" r="9" fill="#37d8ff"/>
+  <text x="480" y="416" fill="#dce6f7" font-family="system-ui,sans-serif" font-size="18" font-weight="700" text-anchor="middle">TURNTABLE + ASSET</text>
+
+  <g filter="url(#cyanGlow)">
+    <rect x="735" y="405" width="82" height="24" rx="6" fill="#103f55" stroke="#37d8ff" stroke-width="3" transform="rotate(-24 776 417)"/>
+    <path d="M735 395 L545 335" fill="none" stroke="#37d8ff" stroke-width="5" marker-end="url(#cyanArrow)"/>
+  </g>
+  <text x="760" y="463" fill="#37d8ff" font-family="system-ui,sans-serif" font-size="16" text-anchor="middle">CYAN KEY</text>
+
+  <g filter="url(#pinkGlow)">
+    <rect x="163" y="152" width="82" height="24" rx="6" fill="#551034" stroke="#ff3eb5" stroke-width="3" transform="rotate(24 204 164)"/>
+    <path d="M245 180 L418 284" fill="none" stroke="#ff3eb5" stroke-width="5" marker-end="url(#pinkArrow)"/>
+  </g>
+  <text x="197" y="132" fill="#ff3eb5" font-family="system-ui,sans-serif" font-size="16" text-anchor="middle">MAGENTA RIM</text>
+
+  <path d="M775 505 Q625 382 480 443 Q325 505 170 388" fill="none" stroke="#f0f5ff" stroke-width="3" stroke-dasharray="9 7" opacity=".85"/>
+  <circle cx="775" cy="505" r="12" fill="#f0f5ff"/>
+  <path d="M763 505 L735 491 L735 519 Z" fill="#0b0f19"/>
+  <text x="804" y="482" fill="#f0f5ff" font-family="system-ui,sans-serif" font-size="16">HERO CAMERA</text>
+  <text x="282" y="480" fill="#c7d0e2" font-family="system-ui,sans-serif" font-size="15" text-anchor="middle">ORBIT / CINEMATIC PATH</text>
+
+  <g font-family="system-ui,sans-serif" font-size="14" fill="#9ba8be">
+    <text x="65" y="532">TOP-DOWN STUDIO PLAN</text>
+    <text x="895" y="548" text-anchor="end">GLAM + NEUTRAL LIGHT MODES</text>
+  </g>
+</svg>

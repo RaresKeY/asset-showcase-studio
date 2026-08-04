@@ -1,0 +1,51 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Material" path="res://materials/placeholder_body.tres" id="1_body"]
+[ext_resource type="Material" path="res://materials/dark_metal.tres" id="2_dark"]
+[ext_resource type="Material" path="res://materials/cyan_emissive.tres" id="3_cyan"]
+[ext_resource type="Material" path="res://materials/magenta_emissive.tres" id="4_magenta"]
+
+[sub_resource type="CylinderMesh" id="Cylinder_base"]
+material = ExtResource("2_dark")
+top_radius = 0.72
+bottom_radius = 0.82
+height = 0.28
+radial_segments = 32
+
+[sub_resource type="BoxMesh" id="Box_body"]
+material = ExtResource("1_body")
+size = Vector3(1.15, 1.35, 0.9)
+
+[sub_resource type="SphereMesh" id="Sphere_core"]
+material = ExtResource("3_cyan")
+radius = 0.29
+height = 0.58
+radial_segments = 32
+rings = 16
+
+[sub_resource type="TorusMesh" id="Torus_accent"]
+material = ExtResource("4_magenta")
+inner_radius = 0.38
+outer_radius = 0.47
+rings = 32
+ring_segments = 12
+
+[node name="PlaceholderAsset" type="Node3D"]
+
+[node name="Base" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.14, 0)
+mesh = SubResource("Cylinder_base")
+
+[node name="Body" type="MeshInstance3D" parent="."]
+position = Vector3(0, 0.93, 0)
+mesh = SubResource("Box_body")
+
+[node name="Core" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.02, 0.48)
+mesh = SubResource("Sphere_core")
+
+[node name="AccentRing" type="MeshInstance3D" parent="."]
+position = Vector3(0, 1.02, 0.53)
+rotation = Vector3(1.5708, 0, 0)
+mesh = SubResource("Torus_accent")
+

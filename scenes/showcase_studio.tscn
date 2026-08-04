@@ -1,0 +1,254 @@
+[gd_scene load_steps=24 format=3]
+
+[ext_resource type="Script" path="res://scripts/showcase_studio.gd" id="1_studio"]
+[ext_resource type="Script" path="res://scripts/turntable.gd" id="2_turntable"]
+[ext_resource type="Script" path="res://scripts/asset_slot.gd" id="3_slot"]
+[ext_resource type="PackedScene" path="res://scenes/placeholder_asset.tscn" id="4_placeholder"]
+[ext_resource type="PackedScene" path="res://scenes/orbit_camera_rig.tscn" id="5_orbit"]
+[ext_resource type="PackedScene" path="res://scenes/fly_camera_rig.tscn" id="6_fly"]
+[ext_resource type="Material" path="res://materials/backdrop.tres" id="7_backdrop"]
+[ext_resource type="Material" path="res://materials/stage.tres" id="8_stage"]
+[ext_resource type="Material" path="res://materials/dark_metal.tres" id="9_dark"]
+[ext_resource type="Material" path="res://materials/cyan_emissive.tres" id="10_cyan"]
+[ext_resource type="Material" path="res://materials/magenta_emissive.tres" id="11_magenta"]
+
+[sub_resource type="Environment" id="Environment_studio"]
+background_mode = 1
+background_color = Color(0.008, 0.01, 0.017, 1)
+ambient_light_source = 3
+ambient_light_color = Color(0.26, 0.3, 0.42, 1)
+ambient_light_energy = 0.72
+reflected_light_source = 0
+tonemap_mode = 4
+glow_enabled = true
+glow_intensity = 0.65
+glow_strength = 1.15
+glow_bloom = 0.08
+glow_hdr_threshold = 0.9
+ssr_enabled = true
+ssao_enabled = true
+ssao_radius = 2.0
+ssao_intensity = 1.35
+
+[sub_resource type="BoxMesh" id="Box_floor"]
+material = ExtResource("7_backdrop")
+size = Vector3(18, 0.3, 14)
+
+[sub_resource type="BoxMesh" id="Box_wall"]
+material = ExtResource("7_backdrop")
+size = Vector3(18, 9, 0.3)
+
+[sub_resource type="BoxMesh" id="Box_curve"]
+material = ExtResource("7_backdrop")
+size = Vector3(18, 0.55, 1.15)
+
+[sub_resource type="CylinderMesh" id="Cylinder_stage"]
+material = ExtResource("8_stage")
+top_radius = 2.05
+bottom_radius = 2.15
+height = 0.36
+radial_segments = 64
+
+[sub_resource type="CylinderMesh" id="Cylinder_stage_base"]
+material = ExtResource("9_dark")
+top_radius = 2.2
+bottom_radius = 2.3
+height = 0.16
+radial_segments = 64
+
+[sub_resource type="TorusMesh" id="Torus_stage"]
+material = ExtResource("10_cyan")
+inner_radius = 2.02
+outer_radius = 2.09
+rings = 64
+ring_segments = 8
+
+[sub_resource type="BoxMesh" id="Box_light_panel"]
+size = Vector3(2.6, 0.08, 0.75)
+
+[sub_resource type="BoxMesh" id="Box_rail"]
+material = ExtResource("9_dark")
+size = Vector3(10, 0.12, 0.12)
+
+[sub_resource type="StyleBoxFlat" id="Style_panel"]
+bg_color = Color(0.018, 0.024, 0.038, 0.88)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.1, 0.72, 0.9, 0.55)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 18.0
+content_margin_top = 14.0
+content_margin_right = 18.0
+content_margin_bottom = 14.0
+
+[node name="ShowcaseStudio" type="Node3D"]
+script = ExtResource("1_studio")
+key_color = Color(0.215686, 0.847059, 1, 1)
+rim_color = Color(1, 0.243137, 0.709804, 1)
+key_energy = 8.0
+rim_energy = 7.0
+overhead_energy = 2.2
+start_with_ui_visible = true
+start_in_fly_camera = false
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_studio")
+
+[node name="StudioReflectionProbe" type="ReflectionProbe" parent="."]
+position = Vector3(0, 2.3, -0.4)
+size = Vector3(14, 7.5, 12)
+box_projection = true
+intensity = 0.9
+update_mode = 0
+
+[node name="Cyclorama" type="Node3D" parent="."]
+
+[node name="Floor" type="MeshInstance3D" parent="Cyclorama"]
+position = Vector3(0, -0.35, 0)
+mesh = SubResource("Box_floor")
+
+[node name="BackWall" type="MeshInstance3D" parent="Cyclorama"]
+position = Vector3(0, 4.0, -6.5)
+mesh = SubResource("Box_wall")
+
+[node name="CurveLower" type="MeshInstance3D" parent="Cyclorama"]
+position = Vector3(0, 0.0, -6.0)
+rotation = Vector3(-0.18, 0, 0)
+mesh = SubResource("Box_curve")
+
+[node name="CurveMiddle" type="MeshInstance3D" parent="Cyclorama"]
+position = Vector3(0, 0.36, -6.35)
+rotation = Vector3(-0.55, 0, 0)
+mesh = SubResource("Box_curve")
+
+[node name="CurveUpper" type="MeshInstance3D" parent="Cyclorama"]
+position = Vector3(0, 0.82, -6.55)
+rotation = Vector3(-1.05, 0, 0)
+mesh = SubResource("Box_curve")
+
+[node name="Stage" type="Node3D" parent="."]
+
+[node name="StageBase" type="MeshInstance3D" parent="Stage"]
+position = Vector3(0, -0.17, 0)
+mesh = SubResource("Cylinder_stage_base")
+
+[node name="Turntable" type="Node3D" parent="Stage"]
+script = ExtResource("2_turntable")
+speed_degrees = 18.0
+clockwise = true
+paused = false
+
+[node name="Disc" type="MeshInstance3D" parent="Stage/Turntable"]
+mesh = SubResource("Cylinder_stage")
+
+[node name="AccentRing" type="MeshInstance3D" parent="Stage/Turntable"]
+position = Vector3(0, 0.16, 0)
+mesh = SubResource("Torus_stage")
+
+[node name="AssetSlot" type="Node3D" parent="Stage/Turntable"]
+position = Vector3(0, 0.18, 0)
+script = ExtResource("3_slot")
+auto_fit_to_stage = true
+target_height = 2.35
+target_diameter = 2.6
+center_on_stage = true
+vertical_offset = 0.008
+
+[node name="PlaceholderAsset" parent="Stage/Turntable/AssetSlot" instance=ExtResource("4_placeholder")]
+
+[node name="Lighting" type="Node3D" parent="."]
+
+[node name="KeyLight" type="SpotLight3D" parent="Lighting"]
+position = Vector3(4.6, 4.8, 4.2)
+rotation = Vector3(-0.62, 0.83, 0)
+light_color = Color(0.215686, 0.847059, 1, 1)
+light_energy = 8.0
+shadow_enabled = true
+spot_range = 13.0
+spot_angle = 38.0
+spot_angle_attenuation = 0.65
+
+[node name="RimLight" type="SpotLight3D" parent="Lighting"]
+position = Vector3(-4.4, 3.7, -1.0)
+rotation = Vector3(-0.55, -1.79, 0)
+light_color = Color(1, 0.243137, 0.709804, 1)
+light_energy = 7.0
+shadow_enabled = true
+spot_range = 11.0
+spot_angle = 42.0
+spot_angle_attenuation = 0.7
+
+[node name="OverheadLight" type="OmniLight3D" parent="Lighting"]
+position = Vector3(0, 4.8, 0)
+light_color = Color(0.82, 0.87, 1, 1)
+light_energy = 2.2
+omni_range = 8.0
+shadow_enabled = true
+
+[node name="CeilingRail" type="MeshInstance3D" parent="Lighting"]
+position = Vector3(0, 5.35, -0.6)
+mesh = SubResource("Box_rail")
+
+[node name="CyanPractical" type="MeshInstance3D" parent="Lighting"]
+position = Vector3(3.6, 4.95, 0.4)
+rotation = Vector3(0.3, 0, -0.18)
+material_override = ExtResource("10_cyan")
+mesh = SubResource("Box_light_panel")
+
+[node name="MagentaPractical" type="MeshInstance3D" parent="Lighting"]
+position = Vector3(-3.6, 4.95, 0.4)
+rotation = Vector3(0.3, 0, 0.18)
+material_override = ExtResource("11_magenta")
+mesh = SubResource("Box_light_panel")
+
+[node name="Cameras" type="Node3D" parent="."]
+
+[node name="OrbitCameraRig" parent="Cameras" instance=ExtResource("5_orbit")]
+
+[node name="FlyCameraRig" parent="Cameras" instance=ExtResource("6_fly")]
+
+[node name="Interface" type="CanvasLayer" parent="."]
+
+[node name="Margin" type="MarginContainer" parent="Interface"]
+offset_left = 28.0
+offset_top = 28.0
+offset_right = 530.0
+offset_bottom = 258.0
+
+[node name="Panel" type="PanelContainer" parent="Interface/Margin"]
+theme_override_styles/panel = SubResource("Style_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Interface/Margin/Panel"]
+theme_override_constants/separation = 7
+
+[node name="Title" type="Label" parent="Interface/Margin/Panel/VBox"]
+theme_override_colors/font_color = Color(0.8, 0.95, 1, 1)
+theme_override_font_sizes/font_size = 23
+text = "ASSET SHOWCASE  /  STUDIO A"
+
+[node name="Status" type="Label" parent="Interface/Margin/Panel/VBox"]
+theme_override_colors/font_color = Color(0.25, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "TURNTABLE  ROLLING  |  18.0°/s  CW"
+
+[node name="Camera" type="Label" parent="Interface/Margin/Panel/VBox"]
+theme_override_colors/font_color = Color(1, 0.42, 0.76, 1)
+theme_override_font_sizes/font_size = 15
+text = "CAMERA  HERO / ORBIT"
+
+[node name="Lighting" type="Label" parent="Interface/Margin/Panel/VBox"]
+theme_override_colors/font_color = Color(0.95, 0.89, 0.76, 1)
+theme_override_font_sizes/font_size = 15
+text = "LIGHTING  CYAN / MAGENTA"
+
+[node name="Divider" type="HSeparator" parent="Interface/Margin/Panel/VBox"]
+
+[node name="Controls" type="Label" parent="Interface/Margin/Panel/VBox"]
+theme_override_colors/font_color = Color(0.68, 0.72, 0.8, 1)
+theme_override_font_sizes/font_size = 13
+text = "1–7 SHOTS   •   DRAG ORBIT   •   WHEEL ZOOM\nSPACE PAUSE   •   V REVERSE   •   [ ] SPEED\nF/C FLY   •   R RESET   •   L LIGHT   •   P CAPTURE   •   H CLEAN"
