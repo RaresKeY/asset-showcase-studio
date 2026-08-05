@@ -15,9 +15,10 @@
 [sub_resource type="Environment" id="Environment_studio"]
 background_mode = 1
 background_color = Color(0.008, 0.01, 0.017, 1)
-ambient_light_source = 3
+ambient_light_source = 2
 ambient_light_color = Color(0.26, 0.3, 0.42, 1)
 ambient_light_energy = 0.72
+ambient_light_sky_contribution = 0.0
 reflected_light_source = 0
 tonemap_mode = 4
 glow_enabled = true
@@ -218,7 +219,7 @@ mesh = SubResource("Box_light_panel")
 offset_left = 28.0
 offset_top = 28.0
 offset_right = 530.0
-offset_bottom = 258.0
+offset_bottom = 292.0
 
 [node name="Panel" type="PanelContainer" parent="Interface/Margin"]
 theme_override_styles/panel = SubResource("Style_panel")
@@ -246,9 +247,14 @@ theme_override_colors/font_color = Color(0.95, 0.89, 0.76, 1)
 theme_override_font_sizes/font_size = 15
 text = "LIGHTING  CYAN / MAGENTA"
 
+[node name="Surface" type="Label" parent="Interface/Margin/Panel/VBox"]
+theme_override_colors/font_color = Color(0.55, 0.9, 1, 1)
+theme_override_font_sizes/font_size = 15
+text = "SURFACE  TEXTURED SMOOTH"
+
 [node name="Divider" type="HSeparator" parent="Interface/Margin/Panel/VBox"]
 
 [node name="Controls" type="Label" parent="Interface/Margin/Panel/VBox"]
 theme_override_colors/font_color = Color(0.68, 0.72, 0.8, 1)
 theme_override_font_sizes/font_size = 13
-text = "1–7 SHOTS   •   DRAG ORBIT   •   WHEEL ZOOM\nSPACE PAUSE   •   V REVERSE   •   [ ] SPEED\nF/C FLY   •   R RESET   •   L LIGHT   •   P CAPTURE   •   H CLEAN"
+text = "1–7 SHOTS   •   DRAG ORBIT   •   WHEEL ZOOM\nSPACE PAUSE   •   V REVERSE   •   [ ] SPEED\nF/C FLY   •   R RESET   •   L LIGHT   •   M SURFACE\nP CAPTURE   •   H CLEAN"

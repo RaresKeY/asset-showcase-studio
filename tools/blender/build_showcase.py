@@ -258,7 +258,7 @@ def build_set(
     set_collection: bpy.types.Collection,
     practical_collection: bpy.types.Collection,
     mats: dict[str, bpy.types.Material],
-) -> tuple[bpy.types.Object, bpy.types.Object]:
+) -> tuple[bpy.types.Object, bpy.types.Object, bpy.types.Object]:
     build_cyclorama(set_collection, mats["cyclorama"])
 
     # Layered pedestal: a dark plinth, brushed turntable, and emissive reveal.

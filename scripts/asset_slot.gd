@@ -1,6 +1,8 @@
 class_name ShowcaseAssetSlot
 extends Node3D
 
+const MESH_LINE_SHADER: Shader = preload("res://shaders/mesh_lines.gdshader")
+
 signal asset_loaded(source_path: String)
 signal asset_load_failed(source_path: String, reason: String)
 signal asset_fitted(local_bounds: AABB)
@@ -18,11 +20,12 @@ signal presentation_mode_changed(mesh_lines_enabled: bool)
 @export_category("Presentation Surface")
 @export var start_with_mesh_lines := false
 @export var mesh_line_color := Color(0.12, 0.82, 1.0, 0.34)
+@export_range(0.0, 0.02, 0.0001, "suffix:m") var mesh_line_offset := 0.0015
 
 var _imported_root: Node3D
 var _mesh_lines_enabled := false
 var _mesh_line_material: ShaderMaterial
-var _original_overlays: Dictionary = {}
+var _original_overlays: Dictionary[int, Material] = {}
 
 func _ready() -> void:
 	_mesh_lines_enabled = start_with_mesh_lines
@@ -36,8 +39,8 @@ func _ready() -> void:
 		mount_scene(asset_scene, "Inspector PackedScene")
 	call_deferred("_apply_presentation_mode")
 
-func mount_scene(scene: PackedScene, source_label := "PackedScene") -> bool:
-	var instance := scene.instantiate() as Node3D
+func mount_scene(scene: PackedScene, source_label: String = "PackedScene") -> bool:
+	var instance: Node3D = scene.instantiate() as Node3D
 	if instance == null:
 		asset_load_failed.emit(source_label, "PackedScene root must inherit Node3D.")
 		return false
@@ -50,13 +53,13 @@ func load_asset(source_path: String) -> bool:
 		asset_load_failed.emit(source_path, "File is not imported by Godot or does not exist.")
 		push_warning("Showcase asset not found: %s" % source_path)
 		return false
-	var resource := ResourceLoader.load(source_path)
+	var resource: Resource = ResourceLoader.load(source_path)
 	var instance: Node3D
 	if resource is PackedScene:
 		instance = resource.instantiate() as Node3D
 	elif resource is Mesh:
-		var mesh_instance := MeshInstance3D.new()
-		mesh_instance.mesh = resource
+		var mesh_instance: MeshInstance3D = MeshInstance3D.new()
+		mesh_instance.mesh = resource as Mesh
 		instance = mesh_instance
 	if instance == null:
 		asset_load_failed.emit(source_path, "Expected an imported 3D scene or mesh.")
@@ -88,8 +91,8 @@ func _mount_instance(instance: Node3D) -> void:
 	_imported_root = instance
 	_imported_root.name = "ImportedAsset"
 	add_child(_imported_root)
-	var placeholder := get_node_or_null("PlaceholderAsset")
-	if placeholder is Node3D:
+	var placeholder: Node3D = get_node_or_null("PlaceholderAsset") as Node3D
+	if placeholder != null:
 		placeholder.visible = false
 	call_deferred("_apply_presentation_mode")
 	if auto_fit_to_stage:
@@ -99,6 +102,7 @@ func _apply_presentation_mode() -> void:
 	if not is_instance_valid(_mesh_line_material):
 		_mesh_line_material = _create_mesh_line_material()
 	_mesh_line_material.set_shader_parameter("line_color", mesh_line_color)
+	_mesh_line_material.set_shader_parameter("line_offset", mesh_line_offset)
 	for mesh_instance in _collect_mesh_instances(self):
 		var instance_id := mesh_instance.get_instance_id()
 		if _mesh_lines_enabled:
@@ -120,30 +124,23 @@ func _collect_mesh_instances(root: Node) -> Array[MeshInstance3D]:
 	var meshes: Array[MeshInstance3D] = []
 	var queue: Array[Node] = [root]
 	while not queue.is_empty():
-		var current := queue.pop_back()
-		if current is MeshInstance3D and current.mesh != null:
-			meshes.append(current)
+		# Array pop methods return Variant even for typed arrays. Cast before use
+		# so Godot's static analyzer never has to infer through Variant.
+		var current: Node = queue.pop_back() as Node
+		if current == null:
+			continue
+		var mesh_instance: MeshInstance3D = current as MeshInstance3D
+		if mesh_instance != null and mesh_instance.mesh != null:
+			meshes.append(mesh_instance)
 		for child in current.get_children():
 			queue.push_back(child)
 	return meshes
 
 func _create_mesh_line_material() -> ShaderMaterial:
-	var shader := Shader.new()
-	shader.code = """
-shader_type spatial;
-render_mode blend_mix, depth_draw_never, cull_back, wireframe;
-
-uniform vec4 line_color : source_color = vec4(0.12, 0.82, 1.0, 0.34);
-
-void fragment() {
-	ALBEDO = line_color.rgb;
-	ALPHA = line_color.a;
-	ROUGHNESS = 0.32;
-}
-"""
-	var material := ShaderMaterial.new()
-	material.shader = shader
+	var material: ShaderMaterial = ShaderMaterial.new()
+	material.shader = MESH_LINE_SHADER
 	material.set_shader_parameter("line_color", mesh_line_color)
+	material.set_shader_parameter("line_offset", mesh_line_offset)
 	return material
 
 func _fit_imported_asset() -> void:
@@ -170,22 +167,19 @@ func _fit_imported_asset() -> void:
 	asset_fitted.emit(bounds)
 
 func _collect_bounds(root: Node) -> AABB:
-	var merged := AABB()
+	var merged: AABB = AABB()
 	var has_bounds := false
-	var queue: Array[Node] = [root]
-	while not queue.is_empty():
-		var current := queue.pop_back()
-		if current is MeshInstance3D and current.mesh != null:
-			var local_bounds: AABB = current.get_aabb()
-			var relative_transform := global_transform.affine_inverse() * current.global_transform
-			local_bounds = relative_transform * local_bounds
-			if has_bounds:
-				merged = merged.merge(local_bounds)
-			else:
-				merged = local_bounds
-				has_bounds = true
-		for child in current.get_children():
-			queue.push_back(child)
+	for mesh_instance in _collect_mesh_instances(root):
+		var local_bounds: AABB = mesh_instance.get_aabb()
+		var relative_transform: Transform3D = (
+			global_transform.affine_inverse() * mesh_instance.global_transform
+		)
+		local_bounds = relative_transform * local_bounds
+		if has_bounds:
+			merged = merged.merge(local_bounds)
+		else:
+			merged = local_bounds
+			has_bounds = true
 	return merged
 
 func _get_command_line_asset() -> String:
