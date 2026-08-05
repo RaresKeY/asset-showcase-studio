@@ -37,9 +37,8 @@ func _initialize() -> void:
 		_fail("Mesh-line mode did not mount its shader overlay.")
 		return
 	var uniform_names: Array[StringName] = []
-	var shader_uniforms: Array[Dictionary] = (
-		overlay_material.shader.get_shader_uniform_list()
-	)
+	var shader_uniforms: Array[Dictionary] = []
+	shader_uniforms.assign(overlay_material.shader.get_shader_uniform_list())
 	for uniform_data: Dictionary in shader_uniforms:
 		uniform_names.append(StringName(uniform_data.get("name", "")))
 	var required_uniforms: Array[StringName] = [&"line_color", &"line_offset"]

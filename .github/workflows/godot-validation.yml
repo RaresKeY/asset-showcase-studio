@@ -1,0 +1,73 @@
+name: Godot 4.7 validation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: godot-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      GODOT_VERSION: 4.7.1
+      GODOT_ARCHIVE_SHA256: c7ff14fd28472c8d4f193043de30278dcf7e5241a1dcf7566b02e27addaa33ba
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install pinned Godot
+        shell: bash
+        run: |
+          set -euo pipefail
+          archive_name="Godot_v${GODOT_VERSION}-stable_linux.x86_64.zip"
+          archive_path="$RUNNER_TEMP/$archive_name"
+          download_url="https://github.com/godotengine/godot-builds/releases/download/${GODOT_VERSION}-stable/$archive_name"
+          curl --fail --location --retry 3 --output "$archive_path" "$download_url"
+          printf '%s  %s\n' "$GODOT_ARCHIVE_SHA256" "$archive_path" | sha256sum --check -
+          unzip -q "$archive_path" -d "$RUNNER_TEMP/godot"
+          godot_bin="$RUNNER_TEMP/godot/Godot_v${GODOT_VERSION}-stable_linux.x86_64"
+          chmod +x "$godot_bin"
+          "$godot_bin" --version
+          printf 'GODOT_BIN=%s\n' "$godot_bin" >> "$GITHUB_ENV"
+
+      - name: Run static regression checks
+        shell: bash
+        run: |
+          set -euo pipefail
+          PYTHONHASHSEED=0 PYTHONDONTWRITEBYTECODE=1 python3 tools/validate_project.py
+          PYTHONHASHSEED=0 PYTHONDONTWRITEBYTECODE=1 python3 tools/test_static_guards.py
+
+      - name: Run native Godot validation
+        shell: bash
+        run: ./tools/validate_godot.sh
+
+      - name: Require committed Godot metadata
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          status="$(git status --porcelain=v1 --untracked-files=all)"
+          if [[ -z "$status" ]]; then
+            echo "Godot import left the checkout clean."
+            exit 0
+          fi
+          echo "::error::Godot import changed the checkout. Commit generated UID/import metadata or fix deterministic source drift."
+          printf '%s\n' "$status"
+          git diff --no-ext-diff -- .
+          while IFS= read -r -d '' file; do
+            printf 'GENERATED_FILE_BASE64 %s ' "$file"
+            base64 -w0 "$file"
+            printf '\n'
+          done < <(git ls-files --others --exclude-standard -z)
+          exit 1
