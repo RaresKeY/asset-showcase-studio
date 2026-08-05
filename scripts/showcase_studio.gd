@@ -14,7 +14,7 @@ extends Node3D
 @export_category("Recording")
 @export var start_with_ui_visible := true
 @export var start_in_fly_camera := false
-@export_dir var capture_directory := "user://showcase_captures"
+@export var capture_directory: String = "user://showcase_captures"
 @export_range(1.0, 30.0, 1.0) var speed_adjust_step := 3.0
 
 @onready var turntable: ShowcaseTurntable = $Stage/Turntable
@@ -24,14 +24,13 @@ extends Node3D
 @onready var status_label: Label = $Interface/Margin/Panel/VBox/Status
 @onready var camera_label: Label = $Interface/Margin/Panel/VBox/Camera
 @onready var lighting_label: Label = $Interface/Margin/Panel/VBox/Lighting
+@onready var surface_label: Label = $Interface/Margin/Panel/VBox/Surface
 @onready var asset_slot: ShowcaseAssetSlot = $Stage/Turntable/AssetSlot
 
-var surface_label: Label
 var _fly_mode := false
 var _lighting_preset := 0
 
 func _ready() -> void:
-	_ensure_surface_ui()
 	_apply_lighting_preset(0)
 	overlay.visible = start_with_ui_visible
 	if "--clean-capture" in OS.get_cmdline_user_args():
@@ -92,20 +91,6 @@ func set_fly_camera(value: bool) -> void:
 	if is_instance_valid(camera_label):
 		camera_label.text = "CAMERA  %s" % ("FLY" if _fly_mode else "HERO / ORBIT")
 
-func _ensure_surface_ui() -> void:
-	var vbox := $Interface/Margin/Panel/VBox as VBoxContainer
-	surface_label = vbox.get_node_or_null("Surface") as Label
-	if surface_label == null:
-		surface_label = Label.new()
-		surface_label.name = "Surface"
-		surface_label.add_theme_color_override("font_color", Color(0.55, 0.9, 1.0, 1.0))
-		surface_label.add_theme_font_size_override("font_size", 15)
-		vbox.add_child(surface_label)
-		vbox.move_child(surface_label, lighting_label.get_index() + 1)
-	var controls := vbox.get_node_or_null("Controls") as Label
-	if controls != null and not controls.text.contains("M SURFACE"):
-		controls.text += "\nM SURFACE: SMOOTH / MESH LINES"
-
 func _on_turntable_changed(_paused: bool) -> void:
 	_update_status()
 
@@ -123,8 +108,7 @@ func _update_status() -> void:
 	status_label.text = "TURNTABLE  %s  |  %.1f°/s  %s" % [state, turntable.speed_degrees, direction]
 
 func _update_surface_status(mesh_lines_enabled: bool) -> void:
-	if is_instance_valid(surface_label):
-		surface_label.text = "SURFACE  %s" % ("TEXTURED + MESH LINES" if mesh_lines_enabled else "TEXTURED SMOOTH")
+	surface_label.text = "SURFACE  %s" % ("TEXTURED + MESH LINES" if mesh_lines_enabled else "TEXTURED SMOOTH")
 
 func _on_asset_fitted(bounds: AABB) -> void:
 	bounds = asset_slot.global_transform * bounds

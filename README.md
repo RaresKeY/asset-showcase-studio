@@ -70,7 +70,9 @@ Mesh-line mode preserves the asset's original textured materials and applies a
 subtle translucent cyan wire overlay. Existing per-mesh material overlays are
 restored when returning to smooth mode. Tune `Mesh Line Color` on
 `Stage/Turntable/AssetSlot`, or enable `Start With Mesh Lines` for a scene-owned
-default.
+default. `Mesh Line Offset` keeps the wire slightly above the textured surface
+without turning it into an X-ray view; adjust it only for unusually scaled
+source meshes.
 
 PNG captures are stored under `user://showcase_captures/`. Godot prints the
 absolute file path in the Output panel after every capture.
@@ -124,24 +126,29 @@ usage, and validation. Encode a sequence with:
 
 ## Validation
 
-Structural validation, modern GDScript grammar parsing, Python AST/compile, and
-shell syntax checks pass in the build environment. Godot and Blender binaries
-were not available there, so the package does not claim an engine-rendered
-preview or a generated `.blend` was produced in this environment.
+The Python validator checks project structure, resource paths, input actions,
+known unsafe GDScript inference patterns, Python syntax, and shell syntax. Its
+regression fixtures cover the two parser failures found during initial use.
+These checks do not replace Godot's parser, resource importer, shader compiler,
+or a Forward+ visual inspection.
 
-Run the engine-native checks after the first Godot import:
+Run the static checks, then the required engine-native wrapper:
 
 ```bash
 python3 tools/validate_project.py
-godot --headless --editor --path . --quit
-godot --headless --path . --script res://tools/headless_smoke_test.gd
+python3 tools/test_static_guards.py
+GODOT_BIN=/absolute/path/to/godot ./tools/validate_godot.sh
 
 blender --background /path/to/generated_showcase.blend \
   --python tools/blender/validate_showcase.py
 ```
 
-The initial `--editor --quit` builds Godot's global script-class cache before
-the smoke test refers to the custom `class_name` types.
+`validate_godot.sh` performs two editor imports, scans their logs for parser and
+shader failures, then runs the scene smoke test. The double import builds and
+then rechecks Godot's global script-class and resource caches. It targets Godot
+4.7 by default, rejects a different engine series, and prints the unique
+temporary directory containing each run's logs. Set `GODOT_REQUIRED_SERIES`
+only when deliberately checking another supported 4.x release.
 
 ## Project map
 
@@ -151,7 +158,9 @@ scenes/flythrough_showcase.tscn   automated cinematic shot
 assets/showcase/                  drop-in model area
 scripts/                          asset fit, cameras, lighting, turntable
 materials/                        self-contained studio materials
+shaders/mesh_lines.gdshader       scale-compensated textured wire overlay
 tools/render_godot_movie.sh       fixed-frame Godot capture
+tools/validate_godot.sh           two imports plus native smoke test
 tools/blender/                    Blender generator and validator
 recordings/                       intended movie output folder
 ```
