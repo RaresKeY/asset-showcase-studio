@@ -72,22 +72,31 @@ jobs:
           done < <(git ls-files --others --exclude-standard -z)
           exit 1
 
-      - name: Stage validated source
+      - name: Stage validated source archive
         shell: bash
         run: |
           set -euo pipefail
-          package_root="$RUNNER_TEMP/package/asset-showcase-studio"
-          rm -rf "$RUNNER_TEMP/package"
-          mkdir -p "$package_root"
-          git archive --format=tar HEAD | tar -xf - -C "$package_root"
-          test -f "$package_root/project.godot"
+          package_dir="$RUNNER_TEMP/package"
+          verify_dir="$RUNNER_TEMP/package-verify"
+          archive="$package_dir/asset-showcase-studio.tar.gz"
+          rm -rf "$package_dir" "$verify_dir"
+          mkdir -p "$package_dir" "$verify_dir"
+          git archive \
+            --format=tar.gz \
+            --prefix=asset-showcase-studio/ \
+            --output="$archive" \
+            HEAD
+          tar -xzf "$archive" -C "$verify_dir"
+          test -f "$verify_dir/asset-showcase-studio/project.godot"
+          test -f "$verify_dir/asset-showcase-studio/.github/workflows/godot-validation.yml"
+          test -f "$verify_dir/asset-showcase-studio/scripts/asset_slot.gd.uid"
+          test -x "$verify_dir/asset-showcase-studio/tools/validate_godot.sh"
 
       - name: Upload validated source
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: asset-showcase-studio-${{ github.sha }}
-          path: ${{ runner.temp }}/package
-          include-hidden-files: true
+          path: ${{ runner.temp }}/package/asset-showcase-studio.tar.gz
           if-no-files-found: error
           retention-days: 14
-          compression-level: 9
+          compression-level: 0
