@@ -31,19 +31,31 @@ run_checked() {
   local label="$1"
   shift
   local log="$LOG_DIR/${label}.log"
+  local -a pipeline_status
   echo "Running $label with $VERSION_LINE"
+  set +e
   "$@" 2>&1 | tee "$log"
+  pipeline_status=("${PIPESTATUS[@]}")
+  set -e
+  if (( pipeline_status[0] != 0 || pipeline_status[1] != 0 )); then
+    echo "Godot command failed during $label (engine=${pipeline_status[0]}, tee=${pipeline_status[1]}). See $log." >&2
+    return 1
+  fi
   if grep -Eiq \
     'SCRIPT ERROR|Parse Error|Failed to load script|Shader (compilation )?failed|Invalid shader' \
     "$log"; then
-    echo "Godot reported a parser, script, or shader failure during $label." >&2
-    exit 1
+    echo "Godot reported a parser, script, or shader failure during $label. See $log." >&2
+    return 1
   fi
 }
 
 run_checked import-pass-1 "$GODOT" --headless --editor --path "$ROOT" --import --quit
 run_checked import-pass-2 "$GODOT" --headless --editor --path "$ROOT" --import --quit
-run_checked smoke "$GODOT" --headless --path "$ROOT" \
+run_checked smoke "$GODOT" --headless --path "$ROOT" --quit-after 600 \
   --script res://tools/headless_smoke_test.gd
+if ! grep -Fq 'SHOWCASE_SMOKE_TEST_OK' "$LOG_DIR/smoke.log"; then
+  echo "Smoke test exited without its success marker. See $LOG_DIR/smoke.log." >&2
+  exit 1
+fi
 
 echo "SHOWCASE_GODOT_VALIDATION_OK"
