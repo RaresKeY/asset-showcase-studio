@@ -17,6 +17,9 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RES_PATH = re.compile(r'(?P<path>res://[^"\'\s\)\]]+)')
 CLASS_NAME = re.compile(r"^class_name\s+([A-Za-z_][A-Za-z0-9_]*)", re.MULTILINE)
+COMMA_FILE_FILTER = re.compile(
+    r'''@export_(?:global_)?file\(\s*(["'])([^"']*,[^"']*)\1'''
+)
 
 
 def fail(errors: list[str], message: str) -> None:
@@ -54,6 +57,19 @@ def validate_resource_paths(errors: list[str]) -> None:
             target = ROOT / resource.removeprefix("res://")
             if not target.exists():
                 fail(errors, f"Missing resource from {path.relative_to(ROOT)}: {resource}")
+
+
+def validate_godot_annotations(errors: list[str]) -> None:
+    for path in sorted(ROOT.rglob("*.gd")):
+        text = path.read_text(encoding="utf-8")
+        for match in COMMA_FILE_FILTER.finditer(text):
+            line_number = text.count("\n", 0, match.start()) + 1
+            fail(
+                errors,
+                f"Comma-separated file export filter at "
+                f"{path.relative_to(ROOT)}:{line_number}; "
+                "pass each filter as a separate string argument",
+            )
 
 
 def validate_godot_shape(errors: list[str]) -> None:
@@ -145,6 +161,7 @@ def main() -> int:
     validate_python(errors)
     validate_shell(errors)
     validate_resource_paths(errors)
+    validate_godot_annotations(errors)
     validate_godot_shape(errors)
     validate_clean_package(errors)
     if errors:
