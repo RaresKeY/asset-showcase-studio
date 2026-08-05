@@ -71,3 +71,23 @@ jobs:
             printf '\n'
           done < <(git ls-files --others --exclude-standard -z)
           exit 1
+
+      - name: Stage validated source
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_root="$RUNNER_TEMP/package/asset-showcase-studio"
+          rm -rf "$RUNNER_TEMP/package"
+          mkdir -p "$package_root"
+          git archive --format=tar HEAD | tar -xf - -C "$package_root"
+          test -f "$package_root/project.godot"
+
+      - name: Upload validated source
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: asset-showcase-studio-${{ github.sha }}
+          path: ${{ runner.temp }}/package
+          include-hidden-files: true
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 9
