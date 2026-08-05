@@ -8,7 +8,7 @@ signal presentation_mode_changed(mesh_lines_enabled: bool)
 
 @export_category("Displayed Asset")
 @export var asset_scene: PackedScene
-@export_file("*.glb,*.gltf,*.obj,*.tscn") var external_asset_path := ""
+@export_file("*.glb", "*.gltf", "*.obj", "*.tscn") var external_asset_path := ""
 @export var auto_fit_to_stage := true
 @export_range(0.1, 10.0, 0.05) var target_height := 2.35
 @export_range(0.1, 10.0, 0.05) var target_diameter := 2.6
